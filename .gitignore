@@ -1,0 +1,6 @@
+.vscode/
+__pycache__/
+virtualenv/
+.env
+cookies.json
+media/

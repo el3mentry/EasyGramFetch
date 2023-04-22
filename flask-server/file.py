@@ -39,6 +39,7 @@ def download_send_remove(url: str, senderid: str):
         os.remove(filepath)  # remove old file
         filepath = new_filepath
 
+    print(filepath, corresponding_webhook_url(senderid))
     send_to_discord(file=filepath, url=corresponding_webhook_url(senderid))
-
+    
     os.remove(filepath)

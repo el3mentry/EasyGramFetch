@@ -4,3 +4,7 @@ virtualenv/
 .env
 cookies.json
 media/
+node_modules/
+venv/
+*.log*
+*.mbtree

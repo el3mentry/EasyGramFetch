@@ -27,13 +27,13 @@ app.post('/webhook', (req, res) => {
                 {
                     url: url,
                     senderid: senderid
+                })
+                .then(res => {
+                    console.log('success');
+                })
+                .catch(error => {
+                    console.error(error);
                 });
-                // .then(res => {
-                //     console.log('success');
-                // })
-                // .catch(error => {
-                //     console.error(error);
-                // });
         }
 
         if (lastTimeStamps.length > 40)

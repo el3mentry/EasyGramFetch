@@ -1,4 +1,6 @@
 'use strict';
+// const fs = require('fs');
+const { getUrlFromMessageEntry } = require('./getUrlFromMessageEntry');
 
 const
     express = require('express'),
@@ -9,21 +11,24 @@ const
 let lastTimeStamps = [];
 
 // Imports dependencies and set up http server
-app.post('/webhook', (req, res) => {
+app.post('/webhook', async (req, res) => {
     let body = req.body;
-
-    body.entry.forEach(function (entry) {
+    // fs.writeFileSync('./receivedNativeObj.txt', JSON.stringify(body), { encoding: 'utf-8' });
+    
+    body.entry.forEach(async function (entry) {
         let webhook_event = entry.messaging[0];
         // console.log(webhook_event);
 
         // shortcode: p/alsdjfvasnd
-        let url = webhook_event['message']['text'];
-
         let currentTimeStamp = webhook_event['timestamp'];
         let senderid = webhook_event['sender']['id'];
+
         if (lastTimeStamps.includes(currentTimeStamp) == false) {
             // when the 'if' condition of array containing a timestamp is false, proceess the request.
-            axios.post('http://localhost:5000/scrape',
+            let url = await getUrlFromMessageEntry(webhook_event, senderid);
+            console.log(url);
+            
+            /*axios.post('http://localhost:5000/scrape',
                 {
                     url: url,
                     senderid: senderid
@@ -33,7 +38,7 @@ app.post('/webhook', (req, res) => {
                 })
                 .catch(error => {
                     console.error(error);
-                });
+                }); */
         }
 
         if (lastTimeStamps.length > 40)

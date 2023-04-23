@@ -12,6 +12,7 @@ let lastTimeStamps = [];
 
 // Imports dependencies and set up http server
 app.post('/webhook', async (req, res) => {
+    console.log('received');
     let body = req.body;
     // fs.writeFileSync('./receivedNativeObj.txt', JSON.stringify(body), { encoding: 'utf-8' });
     

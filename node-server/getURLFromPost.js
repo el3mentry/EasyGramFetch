@@ -14,6 +14,7 @@ async function saveCookiesLocally(cookies) {
 }
 
 async function scrapeURLFromPost(senderIdMappedName) {
+    console.log('work started!');
     const username = process.env.USERNAME;
     const password = process.env.PASSWORD;
     let url = 'None';
@@ -43,9 +44,11 @@ async function scrapeURLFromPost(senderIdMappedName) {
 
         let cookies = await context.cookies("https://www.instagram.com");
 
-        // await saveCookiesLocally(cookies);
+        await saveCookiesLocally(cookies);
     }
 
+    console.log('expected login completed');
+    
     await page.goto('https://www.instagram.com/direct/inbox/');
     await new Promise(r => setTimeout(r, 3000));
     await page.screenshot({ path: 'media/inbox.png' });
@@ -59,10 +62,16 @@ async function scrapeURLFromPost(senderIdMappedName) {
     }
 
     await page.getByRole('link', {
-        name: `${senderIdMappedName}\'s profile picture`, exact: false
+        // name: `${senderIdMappedName}\'s profile picture`, exact: false
+        name: `${senderIdMappedName}'s profile picture`, exact: true
     }).click();
 
-    await page.locator('._acfr').nth(-1).click();
+    const element = await page.getByPlaceholder('Message...');
+    const {x, y} = await element.boundingBox();
+
+    console.log(x, y);
+
+    // await page.locator('._acfr').nth(-1).click();
     await new Promise(r => setTimeout(r, 3000));
     url = await page.url();
 

@@ -16,7 +16,7 @@ async function saveCookiesLocally(cookies) {
 async function scrapeURLFromPost(senderIdMappedName) {
     const username = process.env.USERNAME;
     const password = process.env.PASSWORD;
-    let url = 'NOTHING';
+    let url = 'None';
 
     let browser = await chromium.launch();
     let context = await browser.newContext();

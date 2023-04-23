@@ -49,18 +49,21 @@ async function scrapeURLFromPost(senderIdMappedName) {
         await page.getByRole('button', { name: 'Not Now' }).click();
     }
     catch (error) {
-        console.log('Button is not present on the page!');
-        await page.screenshot({ path: 'media/error.png' });
+        // console.log('Button is not present on the page!');
+        // await page.screenshot({ path: 'media/error.png' });
     }
 
     await page.getByRole('link', {
         name: `${senderIdMappedName}'s profile picture`, exact: true
     }).click();
 
+    await new Promise(r => setTimeout(r, 2000));
+
     const element = await page.getByPlaceholder('Message...');
     const { x, y } = await element.boundingBox();
 
-    await page.mouse.click(x + 50, y - 150);
+    await page.screenshot({ path: `media/inbox-${new Date().getTime()}.png` });
+    await page.mouse.click(x + 100, y - 100);
 
     await new Promise(r => setTimeout(r, 6000));
     url = await page.url();

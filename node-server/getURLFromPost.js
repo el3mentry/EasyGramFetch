@@ -62,7 +62,6 @@ async function scrapeURLFromPost(senderIdMappedName) {
     const { x, y } = await element.boundingBox();
 
     await page.mouse.click(x + 50, y - 150);
-    await page.screenshot({ path: 'media/coord.png' });
 
     await new Promise(r => setTimeout(r, 6000));
     url = await page.url();

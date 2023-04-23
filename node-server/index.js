@@ -12,7 +12,6 @@ let lastTimeStamps = [];
 
 // Imports dependencies and set up http server
 app.post('/webhook', async (req, res) => {
-    console.log('received');
     let body = req.body;
     // fs.writeFileSync('./receivedNativeObj.txt', JSON.stringify(body), { encoding: 'utf-8' });
     
@@ -27,7 +26,7 @@ app.post('/webhook', async (req, res) => {
         if (lastTimeStamps.includes(currentTimeStamp) == false) {
             // when the 'if' condition of array containing a timestamp is false, proceess the request.
             let url = await getUrlFromMessageEntry(webhook_event, senderid);
-            console.log(url);
+            console.log(url, senderid);
             
             axios.post('http://localhost:5000/scrape',
                 {

@@ -14,7 +14,6 @@ async function saveCookiesLocally(cookies) {
 }
 
 async function scrapeURLFromPost(senderIdMappedName) {
-    console.log('work started!');
     const username = process.env.USERNAME;
     const password = process.env.PASSWORD;
     let url = 'None';

@@ -37,21 +37,14 @@ async function scrapeURLFromPost(senderIdMappedName) {
         await page.getByLabel('Password').fill(password);
         await page.getByRole('button', { name: 'Log in', exact: true }).click();
 
-        await page.screenshot({ path: 'media/filled.png' });
-
         await new Promise(r => setTimeout(r, 15000));
-        await page.screenshot({ path: 'media/filled2.png' });
 
         let cookies = await context.cookies("https://www.instagram.com");
-
         await saveCookiesLocally(cookies);
     }
 
-    console.log('expected login completed');
-    
     await page.goto('https://www.instagram.com/direct/inbox/');
     await new Promise(r => setTimeout(r, 3000));
-    await page.screenshot({ path: 'media/inbox.png' });
 
     try {
         await page.getByRole('button', { name: 'Not Now' }).click();
@@ -62,17 +55,16 @@ async function scrapeURLFromPost(senderIdMappedName) {
     }
 
     await page.getByRole('link', {
-        // name: `${senderIdMappedName}\'s profile picture`, exact: false
         name: `${senderIdMappedName}'s profile picture`, exact: true
     }).click();
 
     const element = await page.getByPlaceholder('Message...');
-    const {x, y} = await element.boundingBox();
+    const { x, y } = await element.boundingBox();
 
-    console.log(x, y);
+    await page.mouse.click(x + 50, y - 150);
+    await page.screenshot({ path: 'media/coord.png' });
 
-    // await page.locator('._acfr').nth(-1).click();
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise(r => setTimeout(r, 6000));
     url = await page.url();
 
     await context.close();

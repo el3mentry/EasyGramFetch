@@ -29,7 +29,7 @@ app.post('/webhook', async (req, res) => {
             let url = await getUrlFromMessageEntry(webhook_event, senderid);
             console.log(url);
             
-            /*axios.post('http://localhost:5000/scrape',
+            axios.post('http://localhost:5000/scrape',
                 {
                     url: url,
                     senderid: senderid
@@ -39,7 +39,7 @@ app.post('/webhook', async (req, res) => {
                 })
                 .catch(error => {
                     console.error(error);
-                }); */
+                });
         }
 
         if (lastTimeStamps.length > 40)

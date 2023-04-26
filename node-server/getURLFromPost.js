@@ -15,6 +15,13 @@ async function saveCookiesLocally(cookies) {
   });
 }
 
+async function getBrowserWSEndpoint() {
+  let endpoint = await fs.readFile("./webSocketEndpoint.txt", {
+    encoding: "utf-8",
+  });
+  return endpoint;
+}
+
 async function scrapeURLFromPost(senderIdMappedName) {
   console.log(senderIdMappedName);
 
@@ -22,8 +29,9 @@ async function scrapeURLFromPost(senderIdMappedName) {
   const password = process.env.PASSWORD;
   let url = "None";
 
+  let browserWSEndpoint = await getBrowserWSEndpoint();
   // console.time("Chrome Launch");
-  let browser = await chromium.launch();
+  let browser = await chromium.connect(browserWSEndpoint);
   let context = await browser.newContext();
   let page = "";
   // console.timeEnd("Chrome Launch");

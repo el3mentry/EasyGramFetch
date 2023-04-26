@@ -1,13 +1,22 @@
 "use strict";
-// const fs = require('fs');
-const { getUrlFromMessageEntry } = require("./getUrlFromMessageEntry");
 
 const express = require("express"),
   bodyParser = require("body-parser"),
   app = express().use(bodyParser.json()), // creates express http server
-  axios = require("axios");
+  axios = require("axios"),
+  fs = require("fs/promises"),
+  { chromium } = require("playwright"),
+  { getUrlFromMessageEntry } = require("./getUrlFromMessageEntry");
 
 let lastTimeStamps = [];
+
+(async () => {
+  const browserServer = await chromium.launchServer();
+  const browserWSEndpoint = browserServer.wsEndpoint();
+  await fs.writeFile("./webSocketEndpoint.txt", browserWSEndpoint, {
+    encoding: "utf-8",
+  });
+})();
 
 // Imports dependencies and set up http server
 app.post("/webhook", async (req, res) => {
@@ -32,17 +41,17 @@ app.post("/webhook", async (req, res) => {
       let url = await getUrlFromMessageEntry(webhook_event, senderid);
       console.log(url, senderid);
 
-      // axios.post('http://localhost:5000/scrape',
-      //     {
-      //         url: url,
-      //         senderid: senderid
-      //     })
-      //     .then(res => {
-      //         console.log('success');
-      //     })
-      //     .catch(error => {
-      //         console.error(error);
-      //     });
+      axios
+        .post("http://localhost:5000/scrape", {
+          url: url,
+          senderid: senderid,
+        })
+        .then((res) => {
+          console.log("success");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
 
     if (lastTimeStamps.length > 40) lastTimeStamps.shift();
@@ -73,5 +82,5 @@ app.get("/webhook", (req, res) => {
   }
 });
 
-// Sets server port and logs message on success
+// Sets server port and logs message on success4
 app.listen(process.env.PORT || 1337, () => console.log("webhook is listening"));

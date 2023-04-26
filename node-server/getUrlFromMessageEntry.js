@@ -1,13 +1,13 @@
-const {getURLFromPost} = require('./getURLFromPost');
+const { getURLFromPost } = require("./getURLFromPost");
 
 async function getUrlFromMessageEntry(instagramBodyEntryObj, senderid) {
-    let url = 'No Url';
+  let url = "No Url";
 
-    if (instagramBodyEntryObj.message.text) // returns the url text that user has sent.
-        url =  instagramBodyEntryObj['message']['text'];
-    else
-        url = await getURLFromPost(senderid);
-    return url;
+  if (instagramBodyEntryObj.message.text)
+    // returns the url text that user has sent.
+    url = instagramBodyEntryObj["message"]["text"];
+  else url = await getURLFromPost(senderid);
+  return url;
 }
 
 module.exports = { getUrlFromMessageEntry };

@@ -37,7 +37,7 @@ async function scrapeURLFromPost(senderIdMappedName) {
   } else {
     console.log("trying to perform login...");
     page = await context.newPage();
-    await page.goto("https://www.instagram.com/");
+    await page.goto("https://www.instagram.com/accounts/login");
     await page.getByLabel("Phone number, username, or email").click();
     await page.getByLabel("Phone number, username, or email").fill(username);
     await page.getByLabel("Password").click();
@@ -52,9 +52,11 @@ async function scrapeURLFromPost(senderIdMappedName) {
 
   // console.time("Going to Inbox");
   await page.goto("https://www.instagram.com/direct/inbox/");
-  await new Promise((r) => setTimeout(r, 3000));
+  await page.screenshot({ path: "media/inbox.png" });
+  // await new Promise((r) => setTimeout(r, 3000));
   // console.timeEnd("Going to Inbox");
 
+  // await page.screenshot({ path: 'media/notnow.png' });
   // try {
   //   console.time("Not Now Button");
   //   await page.getByRole("button", { name: "Not Now" }).click({timeout: 3000});
@@ -72,6 +74,7 @@ async function scrapeURLFromPost(senderIdMappedName) {
     })
     .click();
 
+  // wait for loading the last media
   await new Promise((r) => setTimeout(r, 2000));
   // console.timeEnd("Profile Picture");
 
@@ -101,12 +104,15 @@ async function scrapeURLFromPost(senderIdMappedName) {
   // console.timeEnd("evaluate");
 
   // console.time("MouseClick");
-  await page.screenshot({ path: `media/inbox-${new Date().getTime()}.png` });
+  // await page.screenshot({ path: `media/inbox-${new Date().getTime()}.png` });
   await page.mouse.click(x + 100, y - 150);
   // console.timeEnd("MouseClick");
 
   // console.time("Url");
-  await new Promise((r) => setTimeout(r, 3000));
+  await page.waitForURL(/https?:\/\/www\.instagram\.com\/(p|stories)\/*/);
+  // await new Promise((r) => setTimeout(r, 5000));
+  await page.screenshot({ path: "media/regex.png" });
+
   url = await page.url();
   // console.timeEnd("Url");
 

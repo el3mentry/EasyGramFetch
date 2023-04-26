@@ -52,7 +52,7 @@ async function scrapeURLFromPost(senderIdMappedName) {
 
   // console.time("Going to Inbox");
   await page.goto("https://www.instagram.com/direct/inbox/");
-  await page.screenshot({ path: "media/inbox.png" });
+  // await page.screenshot({ path: "media/inbox.png" });
   // await new Promise((r) => setTimeout(r, 3000));
   // console.timeEnd("Going to Inbox");
 
@@ -111,7 +111,7 @@ async function scrapeURLFromPost(senderIdMappedName) {
   // console.time("Url");
   await page.waitForURL(/https?:\/\/www\.instagram\.com\/(p|stories)\/*/);
   // await new Promise((r) => setTimeout(r, 5000));
-  await page.screenshot({ path: "media/regex.png" });
+  // await page.screenshot({ path: "media/regex.png" });
 
   url = await page.url();
   // console.timeEnd("Url");

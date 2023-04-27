@@ -9,3 +9,4 @@ venv/
 *.log*
 *.mbtree
 webSocketEndpoint.txt
+test.js

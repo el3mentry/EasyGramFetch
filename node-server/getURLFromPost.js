@@ -49,7 +49,6 @@ async function scrapeURLFromPost(senderIdMappedName) {
     await context.addCookies(JSON.parse(cookies));
     page = await context.newPage();
   } else {
-    console.log("trying to login...");
     page = await context.newPage();
     await page.goto("https://www.instagram.com/accounts/login");
     await page.getByLabel("Phone number, username, or email").click();
@@ -58,8 +57,8 @@ async function scrapeURLFromPost(senderIdMappedName) {
     await page.getByLabel("Password").fill(password);
     await page.getByRole("button", { name: "Log in", exact: true }).click();
 
-    await new Promise((r) => setTimeout(r, 6000));
     await sleepFor(6);
+    await takeScreenshot("trying-to-login");
 
     let cookies = await context.cookies("https://www.instagram.com");
     await saveCookiesLocally(cookies);

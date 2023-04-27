@@ -22,28 +22,34 @@ async function getBrowserWSEndpoint() {
   return endpoint;
 }
 
-async function scrapeURLFromPost(senderIdMappedName) {
-  console.log(senderIdMappedName);
+async function takeScreenshot(screenshotName = "default") {
+  const mediaPath = `media/${screenshotName}-${new Date().getTime()}.png`;
+  await page.screenshot({ path: mediaPath });
+  console.log("screenshot saved at location: ", mediaPath);
+}
 
+async function sleepFor(seconds = 5) {
+  await new Promise((r) => setTimeout(r, seconds * 1000));
+}
+
+async function scrapeURLFromPost(senderIdMappedName) {
   const username = process.env.USERNAME;
   const password = process.env.PASSWORD;
+
   let url = "None";
 
   let browserWSEndpoint = await getBrowserWSEndpoint();
-  // console.time("Chrome Launch");
   let browser = await chromium.connect(browserWSEndpoint);
   let context = await browser.newContext();
+
   let page = "";
-  // console.timeEnd("Chrome Launch");
 
   if (fsSync.existsSync("./cookies.json")) {
-    // console.time("Cookies Fetch");
     let cookies = await fs.readFile("./cookies.json", { encoding: "utf-8" });
     await context.addCookies(JSON.parse(cookies));
     page = await context.newPage();
-    // console.timeEnd("Cookies Fetch");
   } else {
-    console.log("trying to perform login...");
+    console.log("trying to login...");
     page = await context.newPage();
     await page.goto("https://www.instagram.com/accounts/login");
     await page.getByLabel("Phone number, username, or email").click();
@@ -53,18 +59,14 @@ async function scrapeURLFromPost(senderIdMappedName) {
     await page.getByRole("button", { name: "Log in", exact: true }).click();
 
     await new Promise((r) => setTimeout(r, 6000));
+    await sleepFor(6);
 
     let cookies = await context.cookies("https://www.instagram.com");
     await saveCookiesLocally(cookies);
   }
 
-  // console.time("Going to Inbox");
   await page.goto("https://www.instagram.com/direct/inbox/");
-  // await page.screenshot({ path: "media/inbox.png" });
-  // await new Promise((r) => setTimeout(r, 3000));
-  // console.timeEnd("Going to Inbox");
 
-  // await page.screenshot({ path: 'media/notnow.png' });
   // try {
   //   console.time("Not Now Button");
   //   await page.getByRole("button", { name: "Not Now" }).click({timeout: 3000});
@@ -74,7 +76,6 @@ async function scrapeURLFromPost(senderIdMappedName) {
   //   await page.screenshot({ path: 'media/error.png' });
   // }
 
-  // console.time("Profile Picture");
   await page
     .getByRole("link", {
       name: `${senderIdMappedName}'s profile picture`,
@@ -83,24 +84,13 @@ async function scrapeURLFromPost(senderIdMappedName) {
     .click();
 
   // wait for loading the last media
-  await new Promise((r) => setTimeout(r, 2000));
-  // console.timeEnd("Profile Picture");
+  await sleepFor(2);
 
-  // await context.setOffline(true);
-  // console.time("Internet Block");
   await page.route("**/*", (route) => route.abort());
-  // console.log("internet blocked");
 
-  // console.timeEnd("Internet Block");
-
-  // console.time("Message Box");
   const messageBoxElement = await page.getByPlaceholder("Message...");
   const { x, y } = await messageBoxElement.boundingBox();
-  // console.timeEnd("Message Box");
 
-  // console.log("trying to scroll!");
-
-  // console.time("evaluate");
   await page.evaluate(() => {
     document
       .getElementsByClassName("_ab5z _ab5_")[0]
@@ -109,26 +99,16 @@ async function scrapeURLFromPost(senderIdMappedName) {
         document.getElementsByClassName("_ab5z _ab5_")[0].scrollHeight + 10000
       );
   });
-  // console.timeEnd("evaluate");
 
-  // console.time("MouseClick");
-  // await page.screenshot({ path: `media/inbox-${new Date().getTime()}.png` });
   await page.mouse.click(x + 100, y - 150);
-  // console.timeEnd("MouseClick");
 
-  // console.time("Url");
   await page.waitForURL(/https?:\/\/www\.instagram\.com\/(p|stories)\/*/);
-  // await new Promise((r) => setTimeout(r, 5000));
-  // await page.screenshot({ path: "media/regex.png" });
 
   url = await page.url();
-  // console.timeEnd("Url");
-
-  // console.time("close");
   await page.close();
-  await context.close();
-  await browser.close();
-  // console.timeEnd("close");
+
+  // await context.close();
+  // await browser.close();
 
   return url;
 }

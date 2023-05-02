@@ -6,7 +6,7 @@ from video_compressor import compress_video
 
 
 get_random_name = lambda: ''.join(random.choices([chr(i) for i in range(65, 90+1)], k=10))
-TARGET_SIZE = 7.9
+TARGET_SIZE = 24.5
 
 
 def __download_media(url: str):
@@ -35,7 +35,7 @@ def download_send_remove(url: str, senderid: str):
         # compress.
         extension = ".mp4" if ".mp4" in url else ".jpg"
         new_filepath: str = f"{os.getcwd()}/media/{get_random_name()}" + extension
-        compress_video(filepath, new_filepath, 7.9 * 1000)
+        compress_video(filepath, new_filepath, TARGET_SIZE * 1000)
         os.remove(filepath)  # remove old file
         filepath = new_filepath
 

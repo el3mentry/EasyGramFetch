@@ -22,7 +22,7 @@ async function getBrowserWSEndpoint() {
   return endpoint;
 }
 
-async function takeScreenshot(screenshotName = "default") {
+async function takeScreenshot(page, screenshotName = "default") {
   const mediaPath = `media/${screenshotName}-${new Date().getTime()}.png`;
   await page.screenshot({ path: mediaPath });
   console.log("screenshot saved at location: ", mediaPath);
@@ -48,21 +48,22 @@ async function scrapeURLFromPost(senderIdMappedName) {
     let cookies = await fs.readFile("./cookies.json", { encoding: "utf-8" });
     await context.addCookies(JSON.parse(cookies));
     page = await context.newPage();
-  } else {
-    page = await context.newPage();
-    await page.goto("https://www.instagram.com/accounts/login");
-    await page.getByLabel("Phone number, username, or email").click();
-    await page.getByLabel("Phone number, username, or email").fill(username);
-    await page.getByLabel("Password").click();
-    await page.getByLabel("Password").fill(password);
-    await page.getByRole("button", { name: "Log in", exact: true }).click();
+  } 
+  // else {
+  //   page = await context.newPage();
+  //   await page.goto("https://www.instagram.com/accounts/login");
+  //   await page.getByLabel("Phone number, username, or email").click();
+  //   await page.getByLabel("Phone number, username, or email").fill(username);
+  //   await page.getByLabel("Password").click();
+  //   await page.getByLabel("Password").fill(password);
+  //   await page.getByRole("button", { name: "Log in", exact: true }).click();
 
-    await sleepFor(6);
-    await takeScreenshot("trying-to-login");
+  //   await sleepFor(6);
+  //   await takeScreenshot(page, "trying-to-login");
 
-    let cookies = await context.cookies("https://www.instagram.com");
-    await saveCookiesLocally(cookies);
-  }
+  //   let cookies = await context.cookies("https://www.instagram.com");
+  //   await saveCookiesLocally(cookies);
+  // }
 
   await page.goto("https://www.instagram.com/direct/inbox/");
 
@@ -75,29 +76,21 @@ async function scrapeURLFromPost(senderIdMappedName) {
   //   await page.screenshot({ path: 'media/error.png' });
   // }
 
+  await takeScreenshot(page, 'before click');
   await page
-    .getByRole("link", {
-      name: `${senderIdMappedName}'s profile picture`,
-      exact: true,
+    .getByRole("button", {
+      name: `User avatar ${senderIdMappedName}`,
     })
     .click();
 
-  // wait for loading the last media
-  await sleepFor(2);
+  await page.waitForLoadState("networkidle");
 
   await page.route("**/*", (route) => route.abort());
 
-  const messageBoxElement = await page.getByPlaceholder("Message...");
+  const messageBoxElement = await page.getByRole('paragraph');
   const { x, y } = await messageBoxElement.boundingBox();
 
-  await page.evaluate(() => {
-    document
-      .getElementsByClassName("_ab5z _ab5_")[0]
-      .scrollTo(
-        0,
-        document.getElementsByClassName("_ab5z _ab5_")[0].scrollHeight + 10000
-      );
-  });
+  await page.mouse.wheel(0, 10000);
 
   await page.mouse.click(x + 100, y - 150);
 
@@ -107,8 +100,6 @@ async function scrapeURLFromPost(senderIdMappedName) {
   await page.close();
   await context.close();
   
-  // await browser.close();
-
   return url;
 }
 

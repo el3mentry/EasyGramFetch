@@ -76,7 +76,6 @@ async function scrapeURLFromPost(senderIdMappedName) {
   //   await page.screenshot({ path: 'media/error.png' });
   // }
 
-  await takeScreenshot(page, 'before click');
   await page
     .getByRole("button", {
       name: `User avatar ${senderIdMappedName}`,

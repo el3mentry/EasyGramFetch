@@ -3,10 +3,16 @@ require("dotenv").config();
 const fs = require("fs/promises");
 const fsSync = require("fs");
 
-function getURLFromPost(senderid) {
+async function getURLFromPost(senderid) {
   let senderIdMappedName = process.env[`${senderid}`];
-  let url = scrapeURLFromPost(senderIdMappedName);
-  return url;
+  let url = "Nothing";
+  try {
+    url = scrapeURLFromPost(senderIdMappedName);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    return url;
+  }
 }
 
 async function saveCookiesLocally(cookies) {
@@ -20,6 +26,12 @@ async function getBrowserWSEndpoint() {
     encoding: "utf-8",
   });
   return endpoint;
+}
+
+async function takeScreenshotWithoutDate(page, screenshotName = "default") {
+  const mediaPath = `./media/${screenshotName}.png`;
+  await page.screenshot({ path: mediaPath });
+  console.log("screenshot saved at location: ", mediaPath);
 }
 
 async function takeScreenshot(page, screenshotName = "default") {
@@ -66,6 +78,7 @@ async function scrapeURLFromPost(senderIdMappedName) {
   // }
 
   await page.goto("https://www.instagram.com/direct/inbox/");
+  await takeScreenshotWithoutDate(page, 'inbox');
 
   // try {
   //   console.time("Not Now Button");

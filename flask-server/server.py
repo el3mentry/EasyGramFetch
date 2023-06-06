@@ -32,19 +32,25 @@ def scrape() -> str:
         "password": os.getenv(PASSWORD)
     }
 
-    scraped_data: Union[json.JSONDecoder, str] = login_and_scrape(url, credentials)
+    scraped_data: Union[dict, str] = login_and_scrape(url, credentials)
     parsed_urls = ""
 
     
     if isinstance(scraped_data, str):
         # story url
-        download_send_remove(scraped_data, senderid)
+        if scraped_data != "":
+            download_send_remove(scraped_data, senderid)
+        else:
+            print('cookies expired.')
 
     else:
         # post urls
-        parsed_urls: list = parse_urls_in_json(scraped_data)
-        for url in parsed_urls:
-            download_send_remove(url, senderid)
+        if scraped_data != {}:
+            parsed_urls: list = parse_urls_in_json(scraped_data)
+            for url in parsed_urls:
+                download_send_remove(url, senderid)
+        else:
+            print('cookies expired.')
 
     return ""
 

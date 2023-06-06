@@ -16,7 +16,7 @@ def __get_cookies() -> str:
 
 def __save_cookies(cookies: str) -> None:
     with open(COOKIES_JSON, 'w') as cookiestxt:
-        cookiestxt.write(json.dumps(cookies))    
+        cookiestxt.write(json.dumps(cookies))
 
 def __is_cookie_present() -> bool:
     return os.path.exists(COOKIES_JSON)
@@ -51,12 +51,19 @@ def __scrape_post(playwright: Playwright, url: str, credentials: dict) -> dict:
         cookies = context.cookies('https://www.instagram.com')
         __save_cookies(cookies)
 
-    page.goto(url)
+    page.goto(url)  # url = .../?__a=1&__d=dis
+    page.screenshot(path='media/screenshot_post.png')
+    json_to_return = {}
 
-    content = page.inner_text('pre')
+    content: str = page.inner_text('pre')
+    json_to_return = loads(content)
+
+    if json_to_return.get("status") == "fail":
+        os.remove(COOKIES_JSON)
+        json_to_return = {}
+
     browser.close()
-
-    return loads(content)
+    return json_to_return
 
 
 def __is_story(url: str):
@@ -70,6 +77,7 @@ def __is_story(url: str):
 def __scrape_story(playwright: Playwright, url: str, credentials: dict) -> str:
     browser = playwright.chromium.launch(headless=True)
     page, context = None, None
+    story_html, source = "", ""
 
     if(__is_cookie_present()):
         cookies = __get_cookies()
@@ -96,28 +104,51 @@ def __scrape_story(playwright: Playwright, url: str, credentials: dict) -> str:
         cookies = context.cookies('https://www.instagram.com')
         __save_cookies(cookies)
 
-    page.goto(url)
-    time.sleep(3)
-
-    # press on 'view story'
-    page.locator('text=View story').click()
-    time.sleep(2)
-
-    story_html = page.inner_html('._aa64')
-    browser.close()
-
-#................................................................................................................
-
-    soup: BeautifulSoup = BeautifulSoup(story_html, 'html.parser')
-    source: str = ""
+    page.goto(url)  # normal stories url, without __a=1&__d=dis
+    # time.sleep(3)
 
     try:
+        # press on 'view story'
+        page.locator('text=View story').click()
+        time.sleep(2)
+        page.screenshot(path='media/screenshot_story.png')
+
+        story_html = page.inner_html('._aa64')
+        browser.close()
+
+        soup: BeautifulSoup = BeautifulSoup(story_html, 'html.parser')
         source = soup.video.source['src']
+
     except AttributeError:
         # video source absent
         source = soup.img['src']
+        
+    except Exception as e:
+        # cookies might got expired (assumed)
+        # os.remove(COOKIES_JSON)
+        print("e = ", e)
+        source = ""
+    
+    finally:
+        return str(source)
 
-    return str(source)
+
+    # story_html = page.inner_html('._aa64')
+    # print(f"{story_html=}")
+    # browser.close()
+
+#................................................................................................................
+
+    # soup: BeautifulSoup = BeautifulSoup(story_html, 'html.parser')
+    # source: str = ""
+
+    # try:
+    #     source = soup.video.source['src']
+    # except AttributeError:
+    #     # video source absent
+    #     source = soup.img['src']
+
+    # return str(source)
 
 
 

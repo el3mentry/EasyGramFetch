@@ -10,7 +10,7 @@ const express = require("express"),
 
 let lastTimeStamps = [];
 
-(async () => {
+(async () => {  
   const browserServer = await chromium.launchServer();
   const browserWSEndpoint = browserServer.wsEndpoint();
 

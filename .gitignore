@@ -10,3 +10,4 @@ venv/
 *.mbtree
 webSocketEndpoint.txt
 test.js
+*.bak

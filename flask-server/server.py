@@ -26,6 +26,7 @@ def scrape() -> str:
 
     url: str = request.json['url']
     senderid: str = request.json['senderid']
+    print('url received: ', url)
 
     credentials = {
         "username": os.getenv(USERNAME),
@@ -56,4 +57,5 @@ def scrape() -> str:
 
 
 if __name__ == "__main__":
-    APP.run(debug=True)
+    APP.run(debug=True)  # comment this when running python server on different VM
+    # APP.run(host='0.0.0.0', debug=True) # uncomment this when running python server on different VM

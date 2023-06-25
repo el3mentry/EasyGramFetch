@@ -1,7 +1,7 @@
 const { getURLFromPost } = require("./getURLFromPost");
 
 async function getUrlFromMessageEntry(instagramBodyEntryObj, senderid) {
-  let url = "No Url";
+  let url = "";
 
   try {
     if (instagramBodyEntryObj.message.text)

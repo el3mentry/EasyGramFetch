@@ -52,7 +52,7 @@ def __scrape_post(playwright: Playwright, url: str, credentials: dict) -> dict:
         __save_cookies(cookies)
 
     page.goto(url)  # url = .../?__a=1&__d=dis
-    page.screenshot(path='media/screenshot_post.png')
+    page.screenshot(path='media/after_url_append.png')
     json_to_return = {}
 
     content: str = page.inner_text('pre')
@@ -125,7 +125,7 @@ def __scrape_story(playwright: Playwright, url: str, credentials: dict) -> str:
         
     except Exception as e:
         # cookies might got expired (assumed)
-        # os.remove(COOKIES_JSON)
+        os.remove(COOKIES_JSON)
         print("e = ", e)
         source = ""
     

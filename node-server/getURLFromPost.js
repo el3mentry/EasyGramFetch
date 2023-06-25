@@ -5,7 +5,7 @@ const fsSync = require("fs");
 
 async function getURLFromPost(senderid) {
   let senderIdMappedName = process.env[`${senderid}`];
-  let url = "Nothing";
+  let url = "";
   try {
     url = scrapeURLFromPost(senderIdMappedName);
   } catch (error) {
@@ -48,7 +48,7 @@ async function scrapeURLFromPost(senderIdMappedName) {
   const username = process.env.USERNAME;
   const password = process.env.PASSWORD;
 
-  let url = "None";
+  let url = "";
 
   let browserWSEndpoint = await getBrowserWSEndpoint();
   let browser = await chromium.connect(browserWSEndpoint);
@@ -60,22 +60,22 @@ async function scrapeURLFromPost(senderIdMappedName) {
     let cookies = await fs.readFile("./cookies.json", { encoding: "utf-8" });
     await context.addCookies(JSON.parse(cookies));
     page = await context.newPage();
-  } 
-  // else {
-  //   page = await context.newPage();
-  //   await page.goto("https://www.instagram.com/accounts/login");
-  //   await page.getByLabel("Phone number, username, or email").click();
-  //   await page.getByLabel("Phone number, username, or email").fill(username);
-  //   await page.getByLabel("Password").click();
-  //   await page.getByLabel("Password").fill(password);
-  //   await page.getByRole("button", { name: "Log in", exact: true }).click();
+  }
+  else {
+    page = await context.newPage();
+    await page.goto("https://www.instagram.com/accounts/login");
+    await page.getByLabel("Phone number, username, or email").click();
+    await page.getByLabel("Phone number, username, or email").fill(username);
+    await page.getByLabel("Password").click();
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: "Log in", exact: true }).click();
 
-  //   await sleepFor(6);
-  //   await takeScreenshot(page, "trying-to-login");
+    await sleepFor(6);
+    await takeScreenshot(page, "trying-to-login");
 
-  //   let cookies = await context.cookies("https://www.instagram.com");
-  //   await saveCookiesLocally(cookies);
-  // }
+    let cookies = await context.cookies("https://www.instagram.com");
+    await saveCookiesLocally(cookies);
+  }
 
   await page.goto("https://www.instagram.com/direct/inbox/");
   await takeScreenshotWithoutDate(page, 'inbox');

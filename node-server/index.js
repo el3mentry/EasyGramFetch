@@ -10,7 +10,7 @@ const express = require("express"),
 
 let lastTimeStamps = [];
 
-(async () => {  
+(async () => {
   const browserServer = await chromium.launchServer();
   const browserWSEndpoint = browserServer.wsEndpoint();
 
@@ -19,6 +19,11 @@ let lastTimeStamps = [];
     encoding: "utf-8",
   });
 })();
+
+async function isValidUrl(url) {
+  var urlRegex = /https:\/\/www.instagram.com\/p|story|reel\/*/i;
+  return urlRegex.test(url);
+}
 
 app.post("/webhook", async (req, res) => {
   let body = req.body;
@@ -34,19 +39,24 @@ app.post("/webhook", async (req, res) => {
       lastTimeStamps.push(currentTimeStamp);
 
       let url = await getUrlFromMessageEntry(webhook_event, senderid);
-      console.log(url, senderid);
+      console.log(url, senderid, currentTimeStamp);
+      let isValid = await isValidUrl(url);
 
-      axios
-        .post("http://localhost:5000/scrape", {
-          url: url,
-          senderid: senderid,
-        })
-        .then((res) => {
-          console.log("success");
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      if (isValid) {
+        axios
+          .post("http://52.91.58.230:5000/scrape", {
+            url: url,
+            senderid: senderid,
+          })
+          .then((res) => {
+            console.log("success");
+          })
+          .catch((error) => {
+            console.error(error.config);
+          });
+      } else {
+        console.log('url can not be fetched.');
+      }
     }
 
     if (lastTimeStamps.length > 40) lastTimeStamps.shift();

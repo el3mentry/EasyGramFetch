@@ -44,7 +44,7 @@ app.post("/webhook", async (req, res) => {
 
       if (isValid) {
         axios
-          .post("http://52.91.58.230:5000/scrape", {
+          .post("http://localhost:5000/scrape", { // replace the 'localhost' with your ip when running python server in a different VM.
             url: url,
             senderid: senderid,
           })

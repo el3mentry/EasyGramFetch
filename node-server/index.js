@@ -1,91 +1,47 @@
 "use strict";
 
-const express = require("express"),
-  bodyParser = require("body-parser"),
-  app = express().use(bodyParser.json()),
-  axios = require("axios"),
-  fs = require("fs/promises"),
-  { chromium } = require("playwright"),
-  { getUrlFromMessageEntry } = require("./getUrlFromMessageEntry");
+import axios from "axios";
+import PromptSync from "prompt-sync";
+import getURLFromPost from "./getURLFromPost.js";
+import "dotenv/config";
 
-let lastTimeStamps = [];
+const username = process.env.IGUSERNAME;
+const password = process.env.IGPASSWORD;
+const senderName = process.env.SENDERNAME;
+const prompt = PromptSync();
 
-(async () => {
-  const browserServer = await chromium.launchServer();
-  const browserWSEndpoint = browserServer.wsEndpoint();
-
-  // save the websocket endpoint in a file.
-  await fs.writeFile("./webSocketEndpoint.txt", browserWSEndpoint, {
-    encoding: "utf-8",
-  });
-})();
+let isValid = false;
 
 async function isValidUrl(url) {
   var urlRegex = /https:\/\/www.instagram.com\/p|story|reel\/*/i;
   return urlRegex.test(url);
 }
 
-app.post("/webhook", async (req, res) => {
-  let body = req.body;
-
-  body.entry.forEach(async function (entry) {
-    let webhook_event = entry.messaging[0];
-
-    // shortcode: p/alsdjfvasnd
-    let currentTimeStamp = webhook_event["timestamp"];
-    let senderid = webhook_event["sender"]["id"];
-
-    if (!lastTimeStamps.includes(currentTimeStamp)) {
-      lastTimeStamps.push(currentTimeStamp);
-
-      let url = await getUrlFromMessageEntry(webhook_event, senderid);
-      console.log(url, senderid, currentTimeStamp);
-      let isValid = await isValidUrl(url);
-
+(async function () {
+  while (true) {
+    const input = prompt("Type: ");
+    if (input === "c") {
+      let url = await getURLFromPost(username, password, senderName);
+      console.log(url);
+      isValid = await isValidUrl(url);
       if (isValid) {
-        axios
-          .post("http://localhost:5000/scrape", { // replace the 'localhost' with your ip when running python server in a different VM.
-            url: url,
-            senderid: senderid,
+        await axios
+          .post("http://localhost:5000/scrape", {
+            // replace the 'localhost' with your ip when running python server in a different VM.
+            url,
+            senderName
           })
           .then((res) => {
-            console.log("success");
+            console.log("success", res.status);
           })
           .catch((error) => {
             console.error(error.config);
           });
       } else {
-        console.log('url can not be fetched.');
+        console.log("url can not be fetched.");
       }
-    }
+    } else if (input === ".") process.exit(0);
 
-    if (lastTimeStamps.length > 40) lastTimeStamps.shift();
-  });
-});
-
-// Adds support for GET requests to our webhook
-app.get("/webhook", (req, res) => {
-  // Your verify token. Should be a random string.
-  let VERIFY_TOKEN = "Yk8wgH2na*Fy";
-
-  // Parse the query params
-  let mode = req.query["hub.mode"];
-  let token = req.query["hub.verify_token"];
-  let challenge = req.query["hub.challenge"];
-
-  // Checks if a token and mode is in the query string of the request
-  if (mode && token) {
-    // Checks the mode and token sent is correct
-    if (mode === "subscribe" && token === VERIFY_TOKEN) {
-      // Responds with the challenge token from the request
-      console.log("WEBHOOK_VERIFIED");
-      res.status(200).send(challenge);
-    } else {
-      // Responds with '403 Forbidden' if verify tokens do not match
-      res.sendStatus(403);
-    }
+    isValid = false;
   }
-});
-
-// Sets server port and logs message on success4
-app.listen(process.env.PORT || 1337, () => console.log("webhook is listening"));
+})();

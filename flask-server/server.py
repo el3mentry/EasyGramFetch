@@ -25,7 +25,7 @@ def scrape() -> str:
     # url: https://www.instagram.com/p/shortcode
 
     url: str = request.json['url']
-    senderid: str = request.json['senderid']
+    senderName: str = request.json['senderName']
     print('url received: ', url)
 
     credentials = {
@@ -40,7 +40,7 @@ def scrape() -> str:
     if isinstance(scraped_data, str):
         # story url
         if scraped_data != "":
-            download_send_remove(scraped_data, senderid)
+            download_send_remove(scraped_data, senderName)
         else:
             print('cookies expired.')
 
@@ -49,7 +49,7 @@ def scrape() -> str:
         if scraped_data != {}:
             parsed_urls: list = parse_urls_in_json(scraped_data)
             for url in parsed_urls:
-                download_send_remove(url, senderid)
+                download_send_remove(url, senderName)
         else:
             print('cookies expired.')
 

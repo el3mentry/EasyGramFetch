@@ -1,13 +1,11 @@
-const { chromium } = require("playwright");
-require("dotenv").config();
-const fs = require("fs/promises");
-const fsSync = require("fs");
+import { chromium } from "playwright";
+import { writeFile, readFile } from "fs/promises";
+import { existsSync } from "fs";
 
-async function getURLFromPost(senderid) {
-  let senderIdMappedName = process.env[`${senderid}`];
+export default async function getURLFromPost(username, password, senderName) {
   let url = "";
   try {
-    url = scrapeURLFromPost(senderIdMappedName);
+    url = await scrapeURLFromPost(username, password, senderName);
   } catch (error) {
     console.log(error);
   } finally {
@@ -16,16 +14,9 @@ async function getURLFromPost(senderid) {
 }
 
 async function saveCookiesLocally(cookies) {
-  await fs.writeFile("./cookies.json", JSON.stringify(cookies), {
+  await writeFile("./cookies.json", JSON.stringify(cookies), {
     encoding: "utf-8",
   });
-}
-
-async function getBrowserWSEndpoint() {
-  let endpoint = await fs.readFile("./webSocketEndpoint.txt", {
-    encoding: "utf-8",
-  });
-  return endpoint;
 }
 
 async function takeScreenshotWithoutDate(page, screenshotName = "default") {
@@ -44,24 +35,21 @@ async function sleepFor(seconds = 5) {
   await new Promise((r) => setTimeout(r, seconds * 1000));
 }
 
-async function scrapeURLFromPost(senderIdMappedName) {
-  const username = process.env.USERNAME;
-  const password = process.env.PASSWORD;
-
+async function scrapeURLFromPost(username, password, senderName) {
   let url = "";
-
-  let browserWSEndpoint = await getBrowserWSEndpoint();
-  let browser = await chromium.connect(browserWSEndpoint);
+  let browser = await chromium.launch({ headless: true });
   let context = await browser.newContext();
+  if (browser) console.log("browser connected");
 
   let page = "";
 
-  if (fsSync.existsSync("./cookies.json")) {
-    let cookies = await fs.readFile("./cookies.json", { encoding: "utf-8" });
+  if (existsSync("./cookies.json")) {
+    let cookies = await readFile("./cookies.json", { encoding: "utf-8" });
     await context.addCookies(JSON.parse(cookies));
     page = await context.newPage();
-  }
-  else {
+    console.log("had existing cookies");
+  } else {
+    console.log("trying to login");
     page = await context.newPage();
     await page.goto("https://www.instagram.com/accounts/login");
     await page.getByLabel("Phone number, username, or email").click();
@@ -75,10 +63,11 @@ async function scrapeURLFromPost(senderIdMappedName) {
 
     let cookies = await context.cookies("https://www.instagram.com");
     await saveCookiesLocally(cookies);
+    console.log("cookies saved locally.");
   }
 
   await page.goto("https://www.instagram.com/direct/inbox/");
-  await takeScreenshotWithoutDate(page, 'inbox');
+  await takeScreenshotWithoutDate(page, "inbox");
 
   // try {
   //   console.time("Not Now Button");
@@ -91,7 +80,7 @@ async function scrapeURLFromPost(senderIdMappedName) {
 
   await page
     .getByRole("button", {
-      name: `User avatar ${senderIdMappedName}`,
+      name: `User avatar ${senderName}`,
     })
     .click();
 
@@ -99,7 +88,7 @@ async function scrapeURLFromPost(senderIdMappedName) {
 
   await page.route("**/*", (route) => route.abort());
 
-  const messageBoxElement = await page.getByRole('paragraph');
+  const messageBoxElement = await page.getByRole("paragraph");
   const { x, y } = await messageBoxElement.boundingBox();
 
   await page.mouse.wheel(0, 10000);
@@ -111,8 +100,6 @@ async function scrapeURLFromPost(senderIdMappedName) {
   url = await page.url();
   await page.close();
   await context.close();
-  
+
   return url;
 }
-
-module.exports = { getURLFromPost };

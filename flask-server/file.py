@@ -22,11 +22,11 @@ def __download_media(url: str):
 
     return filepath + extension
 
-def corresponding_webhook_url(senderName: str) -> str:
-    return os.getenv(senderName)
+def corresponding_webhook_url(key: str) -> str:
+    return os.getenv(key)
 
 
-def download_send_remove(url: str, senderName: str):
+def download_send_remove(url: str):
     filepath: str = __download_media(url)
     filesize: int = os.path.getsize(filepath)
     filesize_in_mbs: float = filesize / 10**6
@@ -39,7 +39,7 @@ def download_send_remove(url: str, senderName: str):
         os.remove(filepath)  # remove old file
         filepath = new_filepath
 
-    print(filepath, corresponding_webhook_url(senderName))
-    send_to_discord(file=filepath, url=corresponding_webhook_url(senderName))
+    print(filepath, corresponding_webhook_url("DISCORD"))
+    send_to_discord(file=filepath, url=corresponding_webhook_url("DISCORD"))
     
     os.remove(filepath)

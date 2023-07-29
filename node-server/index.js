@@ -26,10 +26,9 @@ async function isValidUrl(url) {
       isValid = await isValidUrl(url);
       if (isValid) {
         await axios
-          .post("http://localhost:5000/scrape", {
+          .post("http://127.0.0.1:5000/scrape", {
             // replace the 'localhost' with your ip when running python server in a different VM.
-            url,
-            senderName
+            url
           })
           .then((res) => {
             console.log("success", res.status);

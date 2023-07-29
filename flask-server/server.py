@@ -2,7 +2,6 @@
 
 from dotenv import load_dotenv
 from flask import Flask, request
-import json
 from file import download_send_remove
 from typing import Union
 
@@ -25,7 +24,6 @@ def scrape() -> str:
     # url: https://www.instagram.com/p/shortcode
 
     url: str = request.json['url']
-    senderName: str = request.json['senderName']
     print('url received: ', url)
 
     credentials = {
@@ -40,7 +38,7 @@ def scrape() -> str:
     if isinstance(scraped_data, str):
         # story url
         if scraped_data != "":
-            download_send_remove(scraped_data, senderName)
+            download_send_remove(scraped_data)
         else:
             print('cookies expired.')
 
@@ -49,7 +47,7 @@ def scrape() -> str:
         if scraped_data != {}:
             parsed_urls: list = parse_urls_in_json(scraped_data)
             for url in parsed_urls:
-                download_send_remove(url, senderName)
+                download_send_remove(url)
         else:
             print('cookies expired.')
 

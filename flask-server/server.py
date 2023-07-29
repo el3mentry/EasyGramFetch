@@ -13,8 +13,8 @@ from parse import parse_urls_in_json
 
 load_dotenv()
 APP = Flask(__name__)
-USERNAME = "USERNAME"
-PASSWORD = "PASSWORD"
+USERNAME = "IGUSERNAME"
+PASSWORD = "IGPASSWORD"
 
 
 @APP.route("/scrape", methods=["GET", "POST"])
